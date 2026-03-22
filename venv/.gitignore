@@ -1,0 +1,45 @@
+# =========================
+# Configurações Sensíveis
+# =========================
+.env
+local_settings.py
+secret.txt
+
+# =========================
+# Banco de Dados
+# =========================
+db.sqlite3
+db.sqlite3-journal
+
+# =========================
+# Arquivos de Ambientes Virtuais
+# =========================
+venv/
+.venv/
+env/
+.env_venv/
+ENV/
+
+# =========================
+# Python / Django Core
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pot
+*.log
+
+# =========================
+# Arquivos Estáticos e Mídia
+# =========================
+staticfiles/
+media/
+assets/
+
+# =========================
+# IDEs e Sistema Operacional
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
