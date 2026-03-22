@@ -19,8 +19,18 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-chave-padrao-local-apenas'
 # SEGURANÇA: Debug False em produção, True em desenvolvimento
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-# Configuração de domínios permitidos
-ALLOWED_HOSTS = os.getenv('DOMINIOS_PERMITIDOS', '127.0.0.1,localhost').split(',')
+# Configuração de domínios permitidos (Refatorado para aceitar Render automaticamente)
+ALLOWED_HOSTS = [
+    'erp-costura.onrender.com',
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com', # Aceita qualquer subdomínio do Render
+]
+
+# Adiciona domínios extras vindos das variáveis de ambiente, se existirem
+extra_hosts = os.getenv('DOMINIOS_PERMITIDOS')
+if extra_hosts:
+    ALLOWED_HOSTS.extend(extra_hosts.split(','))
 
 # Definição dos Apps
 INSTALLED_APPS = [
@@ -98,7 +108,9 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Configuração do WhiteNoise para compressão e cache de estáticos
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Nota: Em desenvolvimento (DEBUG=True), o WhiteNoise é desativado automaticamente pelo Django
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Modelo de Usuário Personalizado
 AUTH_USER_MODEL = 'core.Usuario'
@@ -110,3 +122,6 @@ LOGOUT_REDIRECT_URL = 'login'
 
 # Configuração de campos de ID padrão
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configurações de CSRF para Produção
+CSRF_TRUSTED_ORIGINS = ['https://erp-costura.onrender.com']
