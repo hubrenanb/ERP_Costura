@@ -1,0 +1,34 @@
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 text-ckaizen">
+        <thead class="bg-light">
+            <tr class="small text-muted text-uppercase">
+                <th class="ps-4">Produto</th>
+                <th>Tipo</th>
+                <th>Qtd Atual</th>
+                <th>Unidade</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in lista %}
+            <tr>
+                <td class="ps-4 fw-bold">{{ produto.nome }}</td>
+                <td>{{ produto.get_tipo_display }}</td>
+                <td class="fw-bold fs-5">{{ produto.quantidade_atual }}</td>
+                <td>{{ produto.get_unidade_medida_display }}</td>
+                <td>
+                    {% if produto.quantidade_atual <= produto.estoque_minimo %}
+                        <span class="badge bg-danger text-white px-2 py-1 shadow-sm">⚠️ Baixo</span>
+                    {% else %}
+                        <span class="badge bg-success text-white px-2 py-1 shadow-sm">Adequado</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center py-5 fw-bold text-muted">Nenhum produto cadastrado nesta categoria.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

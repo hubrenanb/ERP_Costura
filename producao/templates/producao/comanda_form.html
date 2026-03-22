@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card shadow">
+    <div class="card-header card-header-ckaizen">
+        <h4 class="mb-0">🩰 {% if editando %}Editar Comanda #{{ form.instance.id }}{% else %}Nova Comanda{% endif %}</h4>
+    </div>
+    <div class="card-body px-4 py-4">
+        <form method="post" id="form-container">
+            {% csrf_token %}
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-ckaizen">Cliente</label>
+                    {{ form.cliente }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-ckaizen">Previsão de Entrega</label>
+                    {{ form.data_entrega_prevista }}
+                </div>
+            </div>
+
+            <hr style="border-color: var(--ckaizen-pink);">
+            <h5 class="mb-3 fw-bold text-ckaizen">Serviços / Itens</h5>
+            
+            {{ formset.management_form }}
+            <div id="item-list">
+                {% for f in formset %}
+                <div class="item-row border p-3 mb-3 bg-white rounded shadow-sm border-ckaizen">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-ckaizen">Descrição do Serviço</label>
+                            {{ f.descricao_servico }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-ckaizen">Quantidade</label>
+                            {{ f.quantidade }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-ckaizen">Preço Unitário (R$)</label>
+                            {{ f.preco_unitario }}
+                        </div>
+                    </div>
+                    {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+                    {% if formset.can_delete %}
+                        <div class="mt-2 text-end">
+                            <label class="text-danger small fw-bold">{{ f.DELETE }} Remover este item</label>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" id="add-item" class="btn btn-outline-secondary fw-bold mb-4">
+                + Adicionar Outro Serviço
+            </button>
+
+            <div class="d-flex justify-content-end border-top pt-3">
+                <a href="{% url 'listar_comandas' %}" class="btn btn-light text-muted fw-bold me-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary px-5 fw-bold">Salvar Dados</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('add-item').addEventListener('click', function() {
+        const container = document.getElementById('item-list');
+        const totalForms = document.querySelector('input[name="itens-TOTAL_FORMS"]');
+        const currentCount = parseInt(totalForms.value);
+        const firstRow = document.querySelector('.item-row');
+        
+        if (!firstRow) {
+            showJsError("Erro interno: Nenhuma linha modelo encontrada.");
+            return;
+        }
+
+        const newDiv = document.createElement('div');
+        newDiv.className = "item-row border p-3 mb-3 bg-white rounded shadow-sm border-ckaizen";
+        let newHtml = firstRow.innerHTML;
+        
+        const regex = /itens-0-/g;
+        newHtml = newHtml.replace(regex, `itens-${currentCount}-`);
+        newDiv.innerHTML = newHtml;
+        
+        const inputs = newDiv.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (input.type !== 'hidden') { input.value = ''; }
+            input.classList.remove('is-invalid');
+            if(input.type === 'checkbox') { input.checked = false; }
+        });
+
+        container.appendChild(newDiv);
+        totalForms.value = currentCount + 1;
+
+        if (typeof aplicarMascaras === "function") {
+            aplicarMascaras();
+        }
+    });
+</script>
+{% endblock %}

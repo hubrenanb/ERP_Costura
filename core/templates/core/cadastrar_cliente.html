@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header card-header-ckaizen">
+                <h4 class="mb-0">🩰 Novo Cliente</h4>
+            </div>
+            <div class="card-body px-4 py-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-ckaizen">Nome Completo</label>
+                            {{ form.nome_completo }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small text-ckaizen">CPF</label>
+                            {{ form.cpf }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small text-ckaizen">Telefone</label>
+                            {{ form.telefone }}
+                        </div>
+                        
+                        <hr class="my-4" style="border-color: var(--ckaizen-pink);">
+                        <h5 class="text-ckaizen mb-3 fw-bold">Endereço</h5>
+
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold small text-ckaizen">CEP</label>
+                            {{ form.cep }}
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold small text-ckaizen">Logradouro</label>
+                            {{ form.logradouro }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold small text-ckaizen">Número</label>
+                            {{ form.numero }}
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-ckaizen">Bairro</label>
+                            {{ form.bairro }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-ckaizen">Cidade</label>
+                            {{ form.cidade }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold small text-ckaizen">UF</label>
+                            {{ form.uf }}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-end border-top pt-3">
+                        <a href="{% url 'cadastrar_cliente' %}" class="btn btn-light me-2 text-muted fw-bold">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">Salvar Cliente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const campoCep = document.querySelector('input[name="cep"]');
+    if (campoCep) {
+        campoCep.addEventListener("blur", function() {
+            let cep = this.value.replace(/\D/g, '');
+            if (cep.length === 8) {
+                fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.erro) {
+                            document.querySelector('input[name="logradouro"]').value = data.logradouro;
+                            document.querySelector('input[name="bairro"]').value = data.bairro;
+                            document.querySelector('input[name="cidade"]').value = data.localidade;
+                            document.querySelector('input[name="uf"]').value = data.uf;
+                            document.querySelector('input[name="numero"]').focus();
+                            document.getElementById('js-sys-alerts').innerHTML = ''; // Limpa erros antigos
+                        } else {
+                            showJsError("O CEP digitado não foi encontrado na base dos Correios.");
+                        }
+                    })
+                    .catch(error => {
+                        showJsError("Falha na comunicação com o ViaCEP. Verifique sua conexão com a internet.");
+                    });
+            }
+        });
+    }
+</script>
+{% endblock %}

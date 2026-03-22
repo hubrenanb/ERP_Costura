@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4 border-0">
+            <div class="card-header card-header-ckaizen">
+                <h5 class="mb-0">Novo Lançamento</h5>
+            </div>
+            <div class="card-body bg-white rounded-bottom">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="text-ckaizen fw-bold small">
+                        {{ form.as_p }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">Registrar</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card border-0 border-start border-success border-4 mb-3 shadow-sm">
+            <div class="card-body py-2">
+                <small class="text-muted fw-bold">Receitas</small>
+                <h5 class="text-success mb-0 fw-bold">R$ {{ receitas }}</h5>
+            </div>
+        </div>
+        <div class="card border-0 border-start border-danger border-4 mb-3 shadow-sm">
+            <div class="card-body py-2">
+                <small class="text-muted fw-bold">Despesas</small>
+                <h5 class="text-danger mb-0 fw-bold">R$ {{ despesas }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom border-ckaizen pt-3">
+                <h5 class="fw-bold text-ckaizen">Histórico Financeiro</h5>
+            </div>
+            <div class="table-responsive bg-white rounded-bottom">
+                <table class="table table-hover align-middle mb-0 text-ckaizen">
+                    <thead class="bg-light">
+                        <tr class="small text-muted text-uppercase">
+                            <th>Data</th><th>Descrição / Categoria</th><th>Valor</th><th>Método</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transacoes %}
+                        <tr>
+                            <td><small>{{ t.data_transacao|date:"d/m/y H:i" }}</small></td>
+                            <td>
+                                <strong>{{ t.descricao }}</strong><br>
+                                <span class="badge bg-light text-secondary border">{{ t.get_categoria_display }}</span>
+                            </td>
+                            <td class="fw-bold {% if t.tipo == 'receita' %}text-success{% else %}text-danger{% endif %}">
+                                {% if t.tipo == 'receita' %}+{% else %}-{% endif %} R$ {{ t.valor }}
+                            </td>
+                            <td><small class="text-muted">{{ t.get_metodo_pagamento_display }}</small></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center py-5 fw-bold">Nenhuma transação registrada.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

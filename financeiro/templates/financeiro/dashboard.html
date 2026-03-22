@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-body py-3 bg-white rounded">
+        <form method="get" class="row g-3 align-items-center">
+            <div class="col-auto"><label class="form-label mb-0 fw-bold text-ckaizen">Período:</label></div>
+            <div class="col-auto"><input type="date" name="data_inicio" class="form-control form-control-sm border-ckaizen" value="{{ data_inicio }}"></div>
+            <div class="col-auto text-muted">até</div>
+            <div class="col-auto"><input type="date" name="data_fim" class="form-control form-control-sm border-ckaizen" value="{{ data_fim }}"></div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-primary px-3 shadow-sm">Filtrar</button>
+                <a href="{% url 'dashboard_financeiro' %}" class="btn btn-sm btn-light fw-bold text-muted">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4 g-3">
+    <div class="col-md-4">
+        <div class="card bg-white p-3 shadow-sm border-0 border-start border-success border-5">
+            <h6 class="text-uppercase mb-1 text-muted fw-bold">Receitas</h6>
+            <h2 class="mb-0 text-success fw-bold">R$ {{ receitas|floatformat:2 }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-white p-3 shadow-sm border-0 border-start border-danger border-5">
+            <h6 class="text-uppercase mb-1 text-muted fw-bold">Despesas</h6>
+            <h2 class="mb-0 text-danger fw-bold">R$ {{ despesas|floatformat:2 }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-white p-3 shadow-sm border-0 border-start {% if saldo_caixa < 0 %}border-danger{% else %}border-primary{% endif %} border-5">
+            <h6 class="text-uppercase mb-1 text-muted fw-bold">Saldo em Caixa</h6>
+            <h2 class="mb-0 {% if saldo_caixa < 0 %}text-danger{% else %}text-primary{% endif %} fw-bold">R$ {{ saldo_caixa|floatformat:2 }}</h2>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 p-4 bg-white rounded">
+    <div class="d-flex justify-content-between mb-4 align-items-center">
+        <h5 class="mb-0 fw-bold text-ckaizen">Fluxo de Caixa</h5>
+        <a href="{% url 'exportar_relatorio' %}" class="btn btn-sm btn-outline-secondary fw-bold">Exportar CSV</a>
+    </div>
+    <canvas id="financeChart" height="100"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('financeChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ datas_json|safe }},
+            datasets: [
+                { label: 'Receitas', data: {{ receitas_json|safe }}, borderColor: '#198754', backgroundColor: 'rgba(25, 135, 84, 0.2)', fill: true, tension: 0.3 },
+                { label: 'Despesas', data: {{ despesas_json|safe }}, borderColor: '#dc3545', backgroundColor: 'rgba(220, 53, 69, 0.2)', fill: true, tension: 0.3 }
+            ]
+        },
+        options: { responsive: true, plugins: { tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': R$ ' + context.parsed.y.toFixed(2); } } } }, scales: { y: { beginAtZero: true } } }
+    });
+</script>
+{% endblock %}

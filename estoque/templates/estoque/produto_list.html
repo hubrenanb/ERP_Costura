@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-ckaizen">Gestão de Inventário</h3>
+    <div>
+        <a href="{% url 'cadastrar_produto' %}" class="btn btn-primary shadow-sm me-2">+ Novo Item</a>
+        <a href="{% url 'movimentar_estoque' %}" class="btn btn-outline-secondary fw-bold bg-white">⇄ Movimentar</a>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-0 border-bottom-0" id="inventoryTabs" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active fw-bold text-ckaizen" id="mat-tab" data-bs-toggle="tab" data-bs-target="#mat" type="button">🧵 Materiais</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link fw-bold text-ckaizen" id="tool-tab" data-bs-toggle="tab" data-bs-target="#tool" type="button">✂️ Ferramentas</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link fw-bold text-ckaizen" id="cons-tab" data-bs-toggle="tab" data-bs-target="#cons" type="button">🧼 Consumo</button>
+    </li>
+</ul>
+
+<div class="tab-content card shadow-sm border-top-0 rounded-top-0 bg-white" id="inventoryTabsContent">
+    <div class="tab-pane fade show active p-3" id="mat" role="tabpanel">
+        {% include "estoque/tabela_estoque_snippet.html" with lista=materiais %}
+    </div>
+    <div class="tab-pane fade p-3" id="tool" role="tabpanel">
+        {% include "estoque/tabela_estoque_snippet.html" with lista=ativos %}
+    </div>
+    <div class="tab-pane fade p-3" id="cons" role="tabpanel">
+        {% include "estoque/tabela_estoque_snippet.html" with lista=consumo %}
+    </div>
+</div>
+
+{% if not is_snippet %}
+<style>
+    .nav-tabs .nav-link.active { border-color: var(--ckaizen-pink) !important; color: var(--ckaizen-pink) !important; border-bottom-color: white !important; }
+    .nav-tabs .nav-link { border: 1px solid transparent; margin-bottom: -1px; }
+</style>
+{% endif %}
+
+{% endblock %}

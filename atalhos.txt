@@ -1,0 +1,8 @@
+# Start Servidor: python manage.py runserver
+
+# Migração do servidor01: python manage.py makemigrations
+# Migração do servidor02: python manage.py migrate
+# Criação de App: python manage.py startapp "financeiro"
+# Ativando o venv: .\venv\Scripts\activate
+# Alteração de senha: python manage.py changepassword operador_balcao
+

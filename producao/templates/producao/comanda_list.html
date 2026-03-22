@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold text-ckaizen">Comandas em Andamento</h3>
+    <a href="{% url 'nova_comanda' %}" class="btn btn-primary shadow-sm">+ Nova Comanda</a>
+</div>
+
+<div class="accordion shadow-sm" id="accordionComandas">
+    {% for comanda in comandas %}
+    <div class="accordion-item mb-3 border-0 rounded shadow-sm overflow-hidden">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-white border-bottom border-ckaizen" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ comanda.id }}">
+                <div class="d-flex justify-content-between w-100 me-3 align-items-center text-ckaizen">
+                    <span><strong>#{{ comanda.id }}</strong> - {{ comanda.cliente.nome_completo }}</span>
+                    <span class="badge" style="background-color: var(--ckaizen-pink); color: var(--ckaizen-brown);">Entrega: {{ comanda.data_entrega_prevista|date:"d/m" }}</span>
+                    {% if comanda.saldo_devedor > 0 %}
+                        <span class="fw-bold text-danger">Falta Pagar: R$ {{ comanda.saldo_devedor }}</span>
+                    {% else %}
+                        <span class="fw-bold text-success">Pago</span>
+                    {% endif %}
+                </div>
+            </button>
+        </h2>
+        <div id="collapse{{ comanda.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionComandas">
+            <div class="accordion-body bg-white">
+                <table class="table table-sm table-borderless mb-3 text-ckaizen">
+                    <thead>
+                        <tr class="small border-bottom">
+                            <th>Descrição</th><th class="text-center">Qtd</th><th class="text-end">Unitário</th><th class="text-end">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in comanda.itens.all %}
+                        <tr>
+                            <td>{{ item.descricao_servico }}</td>
+                            <td class="text-center">{{ item.quantidade }}</td>
+                            <td class="text-end">R$ {{ item.preco_unitario }}</td>
+                            <td class="text-end fw-bold">R$ {{ item.subtotal }}</td> 
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="border-top border-ckaizen mt-2">
+                            <td colspan="3" class="text-end fw-bold">TOTAL DA COMANDA:</td>
+                            <td class="text-end fw-bold text-ckaizen">R$ {{ comanda.valor_total }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+                <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                    {% if user.tipo == 'gerente' or user.is_superuser %}
+                    <a href="{% url 'editar_comanda' comanda.id %}" class="btn btn-sm btn-outline-warning fw-bold">✏️ Editar</a>
+                    {% endif %}
+                    
+                    <a href="{% url 'imprimir_comanda' comanda.id %}" target="_blank" class="btn btn-sm btn-outline-secondary fw-bold">🖨️ Imprimir</a>
+                    
+                    <form method="post" action="{% url 'atualizar_status' comanda.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <select name="status" onchange="this.form.submit()" class="form-select form-select-sm w-auto d-inline border-ckaizen fw-bold text-ckaizen">
+                            {% for cod, nome in status_opcoes %}
+                                <option value="{{ cod }}" {% if comanda.status == cod %}selected{% endif %}>{{ nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    
+                    {% if comanda.saldo_devedor > 0 %}
+                    <a href="{% url 'registrar_pagamento' comanda.id %}" class="btn btn-sm btn-success fw-bold">$ Receber</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-light border text-center text-ckaizen fw-bold py-5">Nenhuma comanda ativa.</div>
+    {% endfor %}
+</div>
+{% endblock %}
