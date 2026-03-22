@@ -5,25 +5,24 @@ Django settings for erp_costura project.
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-import dj_database_url # Importação essencial para a nuvem
+import dj_database_url
 
+# Carrega variáveis do arquivo .env localmente
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Caminho base do projeto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: Fallback adicionado para não quebrar a máquina local caso falte o .env
+# SEGURANÇA: Chave secreta vinda do ambiente ou fallback para desenvolvimento
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-chave-padrao-local-apenas')
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# SEGURANÇA: Debug False em produção, True em desenvolvimento
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-# O split(',') converte a string do .env em uma lista do Python
+# Configuração de domínios permitidos
 ALLOWED_HOSTS = os.getenv('DOMINIOS_PERMITIDOS', '127.0.0.1,localhost').split(',')
 
-
-# Application definition
-
+# Definição dos Apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -32,7 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Apps do ERP
+    # Apps do ERP Ckaizen
     'core',
     'estoque',
     'producao',
@@ -41,7 +40,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # WhiteNoise deve vir obrigatoriamente logo após o SecurityMiddleware
+    # WhiteNoise para servir arquivos estáticos de forma eficiente
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,6 +59,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -70,9 +70,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'erp_costura.wsgi.application'
 
-
-# Database - Configuração Híbrida (Nuvem vs Local)
-# Tenta conectar via DATABASE_URL (padrão Render/Railway). Se falhar, usa o SQLite local.
+# BANCO DE DADOS: PostgreSQL na nuvem ou SQLite local
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
@@ -81,43 +79,34 @@ DATABASES = {
     )
 }
 
-
-# Password validation
-
+# Validação de senhas
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
-
+# Internacionalização
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-
+# Arquivos Estáticos (CSS, JavaScript, Imagens)
 STATIC_URL = 'static/'
-# Diretório onde o Django vai compilar os estáticos na nuvem
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# Define o WhiteNoise como o motor de compressão dos estáticos
+
+# Configuração do WhiteNoise para compressão e cache de estáticos
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Modelo de Usuário Personalizado
 AUTH_USER_MODEL = 'core.Usuario'
 
+# Rotas de Autenticação
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'listar_comandas'
 LOGOUT_REDIRECT_URL = 'login'
+
+# Configuração de campos de ID padrão
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
