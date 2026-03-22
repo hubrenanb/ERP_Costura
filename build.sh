@@ -11,7 +11,7 @@ python manage.py collectstatic --no-input
 # 3. Aplica as migrações (Cria as tabelas no Postgres)
 python manage.py migrate
 
-# 4. CRIAÇÃO SEGURA DO SUPERUSUÁRIO (Ajustado para aceitar username)
+# 4. CRIAÇÃO SEGURA DO SUPERUSUÁRIO (Ajustado para o seu modelo core.Usuario)
 python manage.py shell <<EOF
 from core.models import Usuario
 import os
@@ -21,12 +21,11 @@ senha_admin = os.getenv('ADMIN_PASSWORD')
 
 if email_admin and senha_admin:
     if not Usuario.objects.filter(email=email_admin).exists():
-        # Passamos email tanto para email quanto para username para evitar o TypeError
+        # Removido o campo 'nome' que causou o erro anterior
         Usuario.objects.create_superuser(
             username=email_admin,
             email=email_admin, 
-            password=senha_admin, 
-            nome='Admin Ckaizen'
+            password=senha_admin
         )
         print(f"SUCESSO: Superusuario {email_admin} criado.")
     else:
