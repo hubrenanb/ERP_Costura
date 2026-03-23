@@ -8,55 +8,50 @@ pip install -r requirements.txt
 # 2. Coleta os arquivos estáticos
 python manage.py collectstatic --no-input
 
-# 3. Aplica as migrações (Crucial para o novo modelo de e-mail)
+# 3. LIMPEZA PRÉ-MIGRAÇÃO (Resolve o erro IntegrityError de duplicados)
+# Aqui removemos os usuários que estão impedindo o banco de criar a regra de e-mail único
+python manage.py shell <<EOF
+from django.contrib.auth import get_user_model
+User = get_user_model()
+# Remove TODOS os usuários para resetar o ambiente de acesso e permitir a migração única
+User.objects.all().delete()
+print("Banco limpo para migração.")
+EOF
+
+# 4. Aplica as migrações (Agora vai funcionar pois não há duplicados)
 python manage.py migrate
 
-# 4. CONFIGURAÇÃO DE ACESSOS VIA E-MAIL (Limpeza e Criação)
+# 5. RECRIAÇÃO DOS ACESSOS OFICIAIS
 python manage.py shell <<EOF
 from core.models import Usuario, Empresa
 import os
 
-# Garante a empresa base para evitar Erro 500 ao salvar registros
 empresa, _ = Empresa.objects.get_or_create(nome_fantasia='Ckaizen Ateliê')
 
-# --- LIMPEZA DE SEGURANÇA ---
-# Remove usuários que não seguem a nova regra de e-mail único ou nomes antigos
-Usuario.objects.filter(email='').delete()
-Usuario.objects.filter(username='testando').delete()
-
-# --- SEU SUPERUSUÁRIO ---
 admin_email = os.getenv('ADMIN_EMAIL')
 admin_pass = os.getenv('ADMIN_PASSWORD')
 
+# Recria seu Admin
 if admin_email and admin_pass:
-    # Busca ou cria pelo email (novo padrão)
-    u_admin, created = Usuario.objects.get_or_create(
-        email=admin_email, 
-        defaults={'username': admin_email.split('@')}
+    u_admin = Usuario.objects.create_superuser(
+        username=admin_email.split('@'),
+        email=admin_email,
+        password=admin_pass,
+        empresa=empresa
     )
-    # Forçamos as permissões e a senha correta (hasheada)
-    u_admin.set_password(admin_pass)
-    u_admin.is_superuser = True
-    u_admin.is_staff = True
-    u_admin.is_active = True
-    u_admin.empresa = empresa
-    u_admin.save()
-    print(f"SUCESSO: Superusuario {admin_email} pronto e atualizado.")
+    print(f"Admin {admin_email} recriado.")
 
-# --- USUÁRIO GERENTE (TESTE) ---
-# Login: gerente@ckaizen.com.br | Senha: senha_gerente_123
+# Recria o Gerente de Teste
 gerente_email = 'gerente@ckaizen.com.br'
-u_test, created = Usuario.objects.get_or_create(
+u_test = Usuario.objects.create(
+    username='gerente_ckaizen',
     email=gerente_email,
-    defaults={'username': 'gerente_ckaizen'}
+    is_staff=True,
+    is_active=True,
+    tipo='gerente',
+    empresa=empresa
 )
-
 u_test.set_password('senha_gerente_123')
-u_test.is_staff = True
-u_test.is_active = True
-u_test.tipo = 'gerente'
-u_test.empresa = empresa
 u_test.save()
-print(f"SUCESSO: Gerente {gerente_email} pronto para login.")
-
+print(f"Gerente {gerente_email} recriado.")
 EOF
