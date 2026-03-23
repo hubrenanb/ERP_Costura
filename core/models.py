@@ -15,18 +15,33 @@ class Usuario(AbstractUser):
         ('gerente', 'Gerente'),
         ('funcionario', 'Funcionario'),
     )
-    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='usuarios', null=True)
+    
+    # Refatoração: Email agora é obrigatório e único para login
+    email = models.EmailField('Endereço de e-mail', unique=True)
+    
+    empresa = models.ForeignKey(
+        Empresa, 
+        on_delete=models.CASCADE, 
+        related_name='usuarios', 
+        null=True,
+        blank=True
+    )
     tipo = models.CharField(max_length=15, choices=TIPO_USUARIO, default='funcionario')
     telefone = models.CharField(max_length=15, blank=True, null=True)
 
+    # Define o email como o campo de login oficial
+    USERNAME_FIELD = 'email'
+    # O username ainda existe no banco, mas passa a ser apenas um campo adicional exigido
+    REQUIRED_FIELDS = ['username']
+
     def __str__(self):
-        return f"{self.username} ({self.empresa.nome_fantasia if self.empresa else 'S/E'})"
+        return f"{self.email} ({self.empresa.nome_fantasia if self.empresa else 'S/E'})"
 
 class Cliente(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
     nome_completo = models.CharField(max_length=255)
-    cpf = models.CharField(max_length=14, unique=False) # Removi unique=True para permitir mesmo CPF em empresas diferentes se necessário
+    cpf = models.CharField(max_length=14, unique=False)
     telefone = models.CharField(max_length=15)
     cep = models.CharField(max_length=9)
     logradouro = models.CharField(max_length=255)
