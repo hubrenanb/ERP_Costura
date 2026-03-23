@@ -11,25 +11,37 @@ python manage.py collectstatic --no-input
 # 3. Aplica as migrações (Cria as tabelas no Postgres)
 python manage.py migrate
 
-# 4. CRIAÇÃO SEGURA DO SUPERUSUÁRIO (Removido campo 'nome' para evitar erro)
+# 4. CRIAÇÃO E ATUALIZAÇÃO DE USUÁRIOS (Garante login e senha corretos)
 python manage.py shell <<EOF
-from core.models import Usuario
+from core.models import Usuario, Empresa
 import os
 
-email_admin = os.getenv('ADMIN_EMAIL')
-senha_admin = os.getenv('ADMIN_PASSWORD')
+# Garante que a empresa exista para vincular aos usuários
+empresa, _ = Empresa.objects.get_or_create(nome_fantasia='Ckaizen Ateliê')
 
-if email_admin and senha_admin:
-    if not Usuario.objects.filter(email=email_admin).exists():
-        # Usamos apenas email como identificador (username=email) e a senha
-        Usuario.objects.create_superuser(
-            username=email_admin,
-            email=email_admin, 
-            password=senha_admin
-        )
-        print(f"SUCESSO: Superusuario {email_admin} criado.")
-    else:
-        print(f"AVISO: O usuario {email_admin} ja existe.")
-else:
-    print("ERRO: Variaveis ADMIN_EMAIL ou ADMIN_PASSWORD nao encontradas.")
+# --- CONFIGURAÇÃO DO SEU SUPERUSUÁRIO ---
+admin_email = os.getenv('ADMIN_EMAIL')
+admin_pass = os.getenv('ADMIN_PASSWORD')
+
+if admin_email and admin_pass:
+    # Busca ou cria o usuário pelo email/username
+    u_admin, created = Usuario.objects.get_or_create(username=admin_email, email=admin_email)
+    u_admin.set_password(admin_pass) # Força a senha correta e criptografada
+    u_admin.is_superuser = True
+    u_admin.is_staff = True
+    u_admin.is_active = True
+    u_admin.empresa = empresa
+    u_admin.save()
+    print(f"SUCESSO: Superusuario {admin_email} atualizado/criado.")
+
+# --- CONFIGURAÇÃO DO USUÁRIO DE TESTE (GERENTE) ---
+# Login: testando | Senha: senha_gerente_123
+u_test, created = Usuario.objects.get_or_create(username='testando')
+u_test.set_password('senha_gerente_123') 
+u_test.is_staff = True   # Permite acessar o /admin
+u_test.is_active = True
+u_test.tipo = 'gerente'
+u_test.empresa = empresa
+u_test.save()
+print("SUCESSO: Usuario 'testando' atualizado com senha 'senha_gerente_123'.")
 EOF
