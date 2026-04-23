@@ -1,8 +1,6 @@
 from django.db import models
 from core.models import Empresa
 from producao.models import Comanda
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 class Produto(models.Model):
     TIPO_CHOICES = (
@@ -37,13 +35,3 @@ class MovimentacaoEstoque(models.Model):
 
     def __str__(self):
         return f"{self.produto.nome} - {self.tipo} ({self.quantidade})"
-
-@receiver(post_save, sender=MovimentacaoEstoque)
-def atualizar_saldo_estoque(sender, instance, created, **kwargs):
-    if created:
-        produto = instance.produto
-        if instance.tipo == 'entrada':
-            produto.quantidade_atual += instance.quantidade
-        else:
-            produto.quantidade_atual -= instance.quantidade
-        produto.save()
