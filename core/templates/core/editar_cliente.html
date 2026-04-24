@@ -4,7 +4,7 @@
     <div class="col-md-10">
         <div class="card shadow">
             <div class="card-header card-header-ckaizen">
-                <h4 class="mb-0">🩰 Novo Cliente</h4>
+                <h4 class="mb-0">✏️ Editar Cliente — {{ cliente.nome_completo }}</h4>
             </div>
             <div class="card-body px-4 py-4">
                 <form method="post">
@@ -59,7 +59,7 @@
 
                     <div class="mt-4 text-end border-top pt-3">
                         <a href="{% url 'listar_clientes' %}" class="btn btn-light me-2 text-muted fw-bold">Cancelar</a>
-                        <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">Salvar Cliente</button>
+                        <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">Salvar Alterações</button>
                     </div>
                 </form>
             </div>

@@ -6,7 +6,6 @@
     <title>Ckaizen Ateliê</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Paleta de Cores Ckaizen */
         :root {
             --ckaizen-pink: #E0A39F;
             --ckaizen-pink-hover: #c98e8a;
@@ -67,7 +66,6 @@
             border-radius: 10px 10px 0 0 !important;
         }
 
-        /* Estilo para inputs focados - Melhora UX */
         .form-control:focus, .form-select:focus {
             border-color: var(--ckaizen-pink);
             box-shadow: 0 0 0 0.25rem rgba(224, 163, 159, 0.25);
@@ -83,8 +81,8 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'listar_clientes' %}">Clientes</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'listar_comandas' %}">Comandas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'cadastrar_cliente' %}">Clientes</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'listar_estoque' %}">Estoque</a></li>
                     <li class="nav-item"><a class="nav-link fw-semibold text-success" href="{% url 'listar_transacoes' %}">💰 Caixa</a></li>
                     {% if user.tipo == 'gerente' or user.is_superuser %}
@@ -131,24 +129,19 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Função de Máscaras Global
         function aplicarMascaras() {
-            // CPF
             document.querySelectorAll('input[name*="cpf"]').forEach(el => {
                 IMask(el, { mask: '000.000.000-00' });
             });
 
-            // Telefone
             document.querySelectorAll('input[name*="telefone"]').forEach(el => {
                 IMask(el, { mask: '(00) 00000-0000' });
             });
 
-            // CEP
             document.querySelectorAll('input[name*="cep"]').forEach(el => {
                 IMask(el, { mask: '00000-000' });
             });
 
-            // Moeda (Preços e Valores)
             const moneyFields = document.querySelectorAll('input[name*="preco"], input[name*="valor"], input[name*="quantidade_atual"]');
             moneyFields.forEach(el => {
                 IMask(el, {
